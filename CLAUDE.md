@@ -45,12 +45,14 @@ Output: `test-results/` (video, trace and screenshots per test), `playwright-rep
 - Save/Open: remove `showSaveFilePicker`/`showOpenFilePicker` with `page.addInitScript` so the app saves by download and opens through a file input (`programStorage.ts`). Chrome's file picker itself stays a manual check.
 - The 3D canvas has no DOM: check numbers above first; `toHaveScreenshot` only on the Linux CI runner.
 
-## Layout (being built, see PLAN.md)
 
-- `projects/tts-bot/specs/`: test files
-- `projects/tts-bot/pages/`: page objects (locators and actions for one screen)
-- `projects/tts-bot/fixtures/`: shared setup
-- `shared/`: helpers used by any project
+## Layout
+
+- `tests/`: test files (`*.spec.ts`)
+- `pages/`: page objects (locators and actions for one screen)
+- `fixtures/`: shared setup
+- `utils/`: small helpers
+
 
 ## Reviewing a new or changed test
 

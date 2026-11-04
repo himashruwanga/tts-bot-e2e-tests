@@ -4,7 +4,7 @@
 - [x] 1. Repo, Playwright 1.64, Chromium, Playwright MCP
 - [x] 2. playwright.config.ts (local servers, video, trace)
 - [ ] 3. CLAUDE.md, PLAN.md
-- [ ] 4. Smoke test: `/` → `/intro`, both levels open, 3D model loads (create folders, move testDir)
+- [ ] 4. Smoke test: `/` → `/intro`, Level 1, Level 2 and Settings open, 3D model loads
 - [ ] 5. First video review + break-on-purpose check; `/review-test` skill
 - [ ] 6. App-team request: data-testids + non-production window hook
 

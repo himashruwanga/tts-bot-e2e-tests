@@ -15,7 +15,6 @@ const isCI = !!process.env.CI;
 const isReview = !!process.env.REVIEW;
 
 export default defineConfig({
-  // Temporary: moves to ./projects/tts-bot/specs in Step 4.
   testDir: './tests',
 
   // One test at a time: the virtual arm sends every message to every connected client,
