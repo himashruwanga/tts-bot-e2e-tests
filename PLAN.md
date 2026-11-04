@@ -3,19 +3,18 @@
 ## Phase A: foundations (week 1)
 - [x] 1. Repo, Playwright 1.64, Chromium, Playwright MCP
 - [x] 2. playwright.config.ts (local servers, video, trace)
-- [ ] 3. CLAUDE.md, PLAN.md
-- [ ] 4. Smoke test: `/` → `/intro`, Level 1, Level 2 and Settings open, 3D model loads
+- [x] 3. CLAUDE.md, PLAN.md
+- [x] 4. Smoke test: `/` → `/intro`, Level 1, Level 2 and Settings open, 3D model loads
 - [ ] 5. First video review + break-on-purpose check; `/review-test` skill
 - [ ] 6. App-team request: data-testids + non-production window hook
 
 ## Phase B: first suite (weeks 2–4)
-- [ ] 7. Page objects: intro, Level 1, Level 2, virtual arm page
+- [ ] 7. Page objects: intro, Level 1, Level 2
 - [ ] 8. Level 1: joints move and stop at limits
-- [ ] 9. Virtual arm: connect, run, arm receives commands
-- [ ] 10. Power and LEDs (LED colours need the window hook)
-- [ ] 11. Level 2 Blockly: moves + loop, run on the arm
-- [ ] 12. Save and reopen
-- [ ] 13. Settings page
+- [ ] 9. Power and LEDs on the built-in simulator (LED colours need the window hook)
+- [ ] 10. Level 2 Blockly: moves + loop, run on the built-in simulator (joint chips show the final pose)
+- [ ] 11. Save and reopen
+- [ ] 12. Settings page
 - [ ] Record a Skill spike (week 2): record 3 journeys, convert one, compare
 
 ## Phase C: free CI (weeks 3–4)
@@ -29,6 +28,7 @@
 
 ## Later
 - Self-hosted runner, run after staging deploys
+- Robot connection tests, once the physical robot arrives
 
 ## Trusted tests
 | Test | Reviewed on | Broke on purpose | Status |

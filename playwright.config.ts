@@ -7,7 +7,7 @@ declare const process: { env: Record<string, string | undefined> };
 const APP_DIR = '../tts_bot';
 
 // BASE_URL set (e.g. staging) → test that site and don't start anything locally.
-// Not set → start tts_bot and the virtual arm on this machine.
+// Not set → start tts_bot on this machine.
 const BASE_URL = process.env.BASE_URL;
 const isCI = !!process.env.CI;
 
@@ -17,8 +17,8 @@ const isReview = !!process.env.REVIEW;
 export default defineConfig({
   testDir: './tests',
 
-  // One test at a time: the virtual arm sends every message to every connected client,
-  // so two tests using it at once would see each other's commands.
+  // One test at a time: Next dev mode compiles each page on its first visit, and
+  // parallel tests racing that compile time out.
   workers: 1,
   fullyParallel: false,
 
@@ -56,25 +56,15 @@ export default defineConfig({
     },
   ],
 
-  webServer: BASE_URL ? undefined : [
-    {
-      name: 'app',
-      command: 'npm run dev',
-      cwd: APP_DIR,
-      url: 'http://localhost:3000',
-      // Point the app at the local arm instead of the shared online one in .env.local.
-      env: { NEXT_PUBLIC_VIRTUAL_ARM_WS_URL: 'ws://localhost:8787/ws' },
-      reuseExistingServer: false,
-      timeout: 120_000,
-    },
-    {
-      name: 'virtual-arm',
-      command: 'npm run dev',
-      cwd: `${APP_DIR}/virtual-robot-arm`,
-      url: 'http://localhost:8787',
-      // The arm has nothing that differs between runs, so an already-running one is fine.
-      reuseExistingServer: !isCI,
-      timeout: 60_000,
-    },
-  ],
+  webServer: BASE_URL ? undefined : {
+    command: 'npm run dev',
+    cwd: APP_DIR,
+    url: 'http://localhost:3000',
+    // The virtual arm isn't used (it only stood in until the physical robot arrives), but
+    // ../tts_bot/.env.local points at the shared online arm. Point at localhost instead, so an
+    // accidental Connect reaches nothing rather than an arm other people are using.
+    env: { NEXT_PUBLIC_VIRTUAL_ARM_WS_URL: 'ws://localhost:8787/ws' },
+    reuseExistingServer: false,
+    timeout: 120_000,
+  },
 });

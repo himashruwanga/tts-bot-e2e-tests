@@ -12,11 +12,12 @@ Playwright end-to-end tests for the TTS Robot Arm app in `../tts_bot`. Read `../
 - Locators: `getByRole`, `getByLabel`, `getByText`, `getByTestId`. No CSS or XPath chains.
 - No `waitForTimeout`, no `force: true`. Wait for something the user would see (`expect(...).toHaveText(...)`, a network response).
 - Free tools only unless the user agrees otherwise.
+- Don't use or test the virtual robot arm (`../tts_bot/virtual-robot-arm`): it only stood in until the physical robot arrives. Check robot behaviour on the app's built-in simulator. Robot connection tests wait for the physical robot.
 
 ## Commands
 
 ```bash
-npm test                                   # all tests (starts the app and the virtual arm itself)
+npm test                                   # all tests (starts the app itself)
 npx playwright test <path> -g "<name>"     # one test
 npm run test:ui                            # UI mode: watch and step through tests
 npm run test:review                        # slowMo 200 ms, each test 3 times: for video review
@@ -31,17 +32,16 @@ Output: `test-results/` (video, trace and screenshots per test), `playwright-rep
 
 ## How the setup works
 
-- `playwright.config.ts` `webServer` starts `../tts_bot` (port 3000) and `../tts_bot/virtual-robot-arm` (port 8787).
-- The app is started with `NEXT_PUBLIC_VIRTUAL_ARM_WS_URL=ws://localhost:8787/ws`, because `../tts_bot/.env.local` points at the shared online arm. Never run tests against the shared arm.
-- `workers: 1`: the arm relay forwards every message to every connected client, so tests that use the arm can't run in parallel.
+- `playwright.config.ts` `webServer` starts `../tts_bot` on port 3000 and stops it after the run.
+- The app is started with `NEXT_PUBLIC_VIRTUAL_ARM_WS_URL=ws://localhost:8787/ws` as a safety net: `../tts_bot/.env.local` points at a shared online virtual arm, and tests must never reach it.
+- `workers: 1`: Next dev mode compiles each page on its first visit; parallel tests race that and time out.
 - Video, trace and screenshots are always on locally; CI keeps them only for failures.
 
 ## What tests can read (no app changes needed)
 
-- Level 1 joint sliders: `getByRole('slider', { name: ... })` (aria-label from `ArmControlPanel.tsx`).
+- Level 1 joint sliders: the `aria-label` is on the slider's outer box, not the knob, so use `getByLabel('<joint>', { exact: true }).getByRole('slider')` and read `aria-valuenow`. The Grabber is two buttons, Open and Close (`aria-pressed`), not a slider.
 - Joint values as text, e.g. `90°` (`JointValueChips.tsx`).
 - Simulator panel power state text (`RobotSimPanel.tsx`).
-- Virtual arm page (http://localhost:8787): joint angles and a command log. Open it as a second page in the test.
 - Save/Open: remove `showSaveFilePicker`/`showOpenFilePicker` with `page.addInitScript` so the app saves by download and opens through a file input (`programStorage.ts`). Chrome's file picker itself stays a manual check.
 - The 3D canvas has no DOM: check numbers above first; `toHaveScreenshot` only on the Linux CI runner.
 
