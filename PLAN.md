@@ -32,4 +32,10 @@
 
 ## Trusted tests
 | Test | Reviewed on | Broke on purpose | Status |
+| smoke: / redirects to the level select page | 2026-11-04 | next.config.ts redirect → /level-1 | Trusted |
+| smoke: Level 1 opens with the arm in its home pose | 2026-11-04 | HOME_STATE base 135 → 90 | Trusted |
+| smoke: Level 2 opens with the block editor | 2026-11-04 | layout level-2 → level-x | Trusted |
+| smoke: Settings opens from the level select page | 2026-11-04 | intro Settings href → /level-1 | Trusted |
+| smoke: 3D model loads without errors | 2026-11-04 | Mesh_Base → Mesh_Basex | Partly: proves download + no errors, not that the arm is drawn (needs window hook) |
+
 |---|---|---|---|
