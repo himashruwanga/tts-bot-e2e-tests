@@ -1,79 +1,81 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+// Playwright config access to environment variables without requiring Node globals in the TS types.
+declare const process: { env: Record<string, string | undefined> };
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+// Where tts_bot lives (read only: tests never change it).
+const APP_DIR = '../tts_bot';
+
+// BASE_URL set (e.g. staging) → test that site and don't start anything locally.
+// Not set → start tts_bot and the virtual arm on this machine.
+const BASE_URL = process.env.BASE_URL;
+const isCI = !!process.env.CI;
+
+// REVIEW=1 slows every action down so videos are easy to watch.
+const isReview = !!process.env.REVIEW;
+
 export default defineConfig({
+  // Temporary: moves to ./projects/tts-bot/specs in Step 4.
   testDir: './tests',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-  },
+  // One test at a time: the virtual arm sends every message to every connected client,
+  // so two tests using it at once would see each other's commands.
+  workers: 1,
+  fullyParallel: false,
 
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+  // A leftover test.only fails CI instead of silently skipping the other tests.
+  forbidOnly: isCI,
+  // No automatic retries: a test that needs a retry is flaky, and we want to see that.
+  retries: 0,
 
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
+  // The first visit compiles pages in Next dev mode and the 3D model loads
+  // with software graphics, so allow more than the 30s default.
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
 
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+  reporter: [
+    ['list'],                                 // live progress in the terminal
+    ['html', { open: 'never' }],              // open with: npx playwright show-report
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  use: {
+    baseURL: BASE_URL ?? 'http://localhost:3000',
+
+    // Locally: record everything, for reviewing tests.
+    // CI: keep files only for failing tests (free artifact storage is small).
+    video: isCI ? 'retain-on-failure' : 'on',
+    trace: isCI ? 'retain-on-failure' : 'on',
+    screenshot: isCI ? 'only-on-failure' : 'on',
+
+    launchOptions: { slowMo: isReview ? 200 : 0 },
+  },
+
+  projects: [
+    {
+      name: 'tts-bot',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+
+  webServer: BASE_URL ? undefined : [
+    {
+      name: 'app',
+      command: 'npm run dev',
+      cwd: APP_DIR,
+      url: 'http://localhost:3000',
+      // Point the app at the local arm instead of the shared online one in .env.local.
+      env: { NEXT_PUBLIC_VIRTUAL_ARM_WS_URL: 'ws://localhost:8787/ws' },
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
+      name: 'virtual-arm',
+      command: 'npm run dev',
+      cwd: `${APP_DIR}/virtual-robot-arm`,
+      url: 'http://localhost:8787',
+      // The arm has nothing that differs between runs, so an already-running one is fine.
+      reuseExistingServer: !isCI,
+      timeout: 60_000,
+    },
+  ],
 });
