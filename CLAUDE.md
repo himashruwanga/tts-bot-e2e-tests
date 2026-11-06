@@ -37,13 +37,16 @@ Output: `test-results/` (video, trace and screenshots per test), `playwright-rep
 - `workers: 1`: Next dev mode compiles each page on its first visit; parallel tests race that and time out.
 - Video, trace and screenshots are always on locally; CI keeps them only for failures.
 
-## What tests can read (no app changes needed)
+## What tests can read
 
-- Level 1 joint sliders: the `aria-label` is on the slider's outer box, not the knob, so use `getByLabel('<joint>', { exact: true }).getByRole('slider')` and read `aria-valuenow`. The Grabber is two buttons, Open and Close (`aria-pressed`), not a slider.
-- Joint values as text, e.g. `90°` (`JointValueChips.tsx`).
+- Level 1 joint sliders: `getByRole('slider', { name: '<joint>', exact: true })`, value in `aria-valuenow`. The Grabber is two buttons, Open and Close (`aria-pressed`), not a slider.
+- Joint values as text, e.g. `90°` (`JointValueChips.tsx`); each chip's title is `<Joint>: <value>`.
 - Simulator panel power state text (`RobotSimPanel.tsx`).
+- 3D view: `getByTestId('robot-scene')` gets `data-model-loaded="true"` once the arm is loaded and attached.
+- Blockly: `getByTestId('program-workspace')` is the element Blockly draws into.
+- `window.__ttsTest` (read only, `../tts_bot/src/app/robot/e2eHook.ts`), there because the config starts the app with `NEXT_PUBLIC_E2E=1`: `joints()`, `leds()` (colour per LED node, keyed by GLB node name), `sim()` (simulator snapshot), `tiles()` (Level 2 program), `modelLoaded`. Read it with `page.evaluate`; drive the app only through the UI. It doesn't exist on staging.
 - Save/Open: remove `showSaveFilePicker`/`showOpenFilePicker` with `page.addInitScript` so the app saves by download and opens through a file input (`programStorage.ts`). Chrome's file picker itself stays a manual check.
-- The 3D canvas has no DOM: check numbers above first; `toHaveScreenshot` only on the Linux CI runner.
+- The 3D canvas itself has no DOM: use the hook and the values above; `toHaveScreenshot` only on the Linux CI runner.
 
 
 ## Layout

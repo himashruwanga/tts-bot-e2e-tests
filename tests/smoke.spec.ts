@@ -29,9 +29,7 @@ test('Level 1 opens with the arm in its home pose', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Level 1 . change level/ })).toBeVisible();
 
   for (const { joint, value, chip } of HOME_POSE) {
-    // The label sits on the slider's outer box, not on the knob (see the app-team request),
-    // so find the box by its label, then the slider inside it.
-    const slider = page.getByLabel(joint, { exact: true }).getByRole('slider');
+    const slider = page.getByRole('slider', { name: joint, exact: true });
     await expect(slider).toHaveAttribute('aria-valuenow', value);
     // The chip under the 3D model shows the same value.
     await expect(page.getByTitle(chip)).toBeVisible();
@@ -70,13 +68,14 @@ test('3D model loads without errors', async ({ page }) => {
     if (msg.text().includes('not found in GLB')) problems.push(`missing part: ${msg.text()}`);
   });
 
-  // Start listening before opening the page, so the download can't be missed.
-  const modelResponse = page.waitForResponse(r => r.url().endsWith('/models/tts-robot-arm-colored.glb'));
   await page.goto('/level-1');
 
-  const response = await modelResponse;
-  expect(response.ok(), 'model file downloaded').toBe(true);
-  await response.finished();
-  await expect(page.locator('canvas')).toBeVisible();
+  // Set by the app once the GLB is loaded and the arm's parts are attached (useRobotScene.ts).
+  await expect(page.getByTestId('robot-scene')).toHaveAttribute('data-model-loaded', 'true');
+  // The test hook agrees, which also proves the app was started with NEXT_PUBLIC_E2E=1.
+  const hookSaysLoaded = await page.evaluate(
+    () => (window as { __ttsTest?: { modelLoaded: boolean } }).__ttsTest?.modelLoaded,
+  );
+  expect(hookSaysLoaded, 'window.__ttsTest.modelLoaded').toBe(true);
   expect(problems).toEqual([]);
 });

@@ -63,7 +63,11 @@ export default defineConfig({
     // The virtual arm isn't used (it only stood in until the physical robot arrives), but
     // ../tts_bot/.env.local points at the shared online arm. Point at localhost instead, so an
     // accidental Connect reaches nothing rather than an arm other people are using.
-    env: { NEXT_PUBLIC_VIRTUAL_ARM_WS_URL: 'ws://localhost:8787/ws' },
+    env: {
+      NEXT_PUBLIC_VIRTUAL_ARM_WS_URL: 'ws://localhost:8787/ws',
+      // Turns on the app's read-only test hook, window.__ttsTest (../tts_bot/src/app/robot/e2eHook.ts).
+      NEXT_PUBLIC_E2E: '1',
+    },
     reuseExistingServer: false,
     timeout: 120_000,
   },

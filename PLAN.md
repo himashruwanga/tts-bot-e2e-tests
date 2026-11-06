@@ -5,8 +5,8 @@
 - [x] 2. playwright.config.ts (local servers, video, trace)
 - [x] 3. CLAUDE.md, PLAN.md
 - [x] 4. Smoke test: `/` → `/intro`, Level 1, Level 2 and Settings open, 3D model loads
-- [ ] 5. First video review + break-on-purpose check; `/review-test` skill
-- [ ] 6. App-team request: data-testids + non-production window hook
+- [x] 5. First video review + break-on-purpose check; `/review-test` skill
+- [x] 6. App-team request: data-testids + non-production window hook
 
 ## Phase B: first suite (weeks 2–4)
 - [ ] 7. Page objects: intro, Level 1, Level 2
@@ -32,10 +32,11 @@
 
 ## Trusted tests
 | Test | Reviewed on | Broke on purpose | Status |
+|---|---|---|---|
 | smoke: / redirects to the level select page | 2026-11-04 | next.config.ts redirect → /level-1 | Trusted |
 | smoke: Level 1 opens with the arm in its home pose | 2026-11-04 | HOME_STATE base 135 → 90 | Trusted |
 | smoke: Level 2 opens with the block editor | 2026-11-04 | layout level-2 → level-x | Trusted |
 | smoke: Settings opens from the level select page | 2026-11-04 | intro Settings href → /level-1 | Trusted |
-| smoke: 3D model loads without errors | 2026-11-04 | Mesh_Base → Mesh_Basex | Partly: proves download + no errors, not that the arm is drawn (needs window hook) |
+| smoke: 3D model loads without errors | 2026-11-06 | MODEL_URL → /models/missing.glb (data-model-loaded never set); earlier: Mesh_Base → Mesh_Basex | Trusted |
 
-|---|---|---|---|
+

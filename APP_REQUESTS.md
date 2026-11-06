@@ -2,6 +2,13 @@
 
 The E2E tests (repo `tts-bot-e2e-tests`) can't see these today. None of them change what users see.
 
+| # | Request | Status |
+|---|---|---|
+| 1 | Name the joint slider knobs | Done in tts_bot `033d9dd` (2026-11-06) |
+| 2 | "3D model loaded" signal | Done in tts_bot `033d9dd` (2026-11-06) |
+| 3 | Read-only test hook | Done in tts_bot `033d9dd` (2026-11-06) |
+| 4 | Test id on the Blockly workspace | Done in tts_bot `033d9dd` (2026-11-06) |
+
 ## 1. Name the joint slider knobs (accessibility bug)
 
 In `src/app/components/robot/ArmControlPanel.tsx`, `CardSlider` puts `aria-label={label}` on
